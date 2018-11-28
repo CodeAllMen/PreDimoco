@@ -1,0 +1,9 @@
+{
+    "order":"111814",
+    "password":"U8ZhvXhQq6bGnK4",
+    "merchant":"221336",
+    "service_name":"Click4fungames",
+    "server_api_url":"https://services.dimoco.at/smart/payment",
+    "enduser_transport_api_url":"https://services.dimoco.at/smart/userpayment",
+    "secret":"U8ZhvXhQq6bGnK4"
+}

@@ -3,11 +3,11 @@ package initial
 import (
 	"fmt"
 
-	_ "github.com/MobileCPX/PreDimoco/models"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/lib/pq"
+
+	_ "github.com/MobileCPX/PreDimoco/models"
 )
 
 func InitSql() {
@@ -22,13 +22,13 @@ func InitSql() {
 	if beego.AppConfig.String("runmode") == "dev" {
 		orm.Debug = true
 	}
-
+	orm.DefaultRowsLimit = -1
 	orm.RegisterDriver("postgres", orm.DRPostgres) // 注册驱动
 	orm.RegisterDataBase("default",
 		"postgres",
 		fmt.Sprintf(
 			"user=%s password=%s dbname=%s host=%s port=%d sslmode=disable",
 			user, passwd, dbname, host, port))
+
 	orm.RunSyncdb("default", false, true)
-	orm.DefaultRowsLimit = -1
 }
