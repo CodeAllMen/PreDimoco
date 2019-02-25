@@ -80,10 +80,10 @@ type Mo struct {
 	RequestID          string
 	MTSuccessDatetimes string
 	MTFailedDatetimes  string
-	WeekMtNum          int    // 每周已经扣费次数  扣费失败每周最多只能扣费两次
+	WeekMtNum          int                                         // 每周已经扣费次数  扣费失败每周最多只能扣费两次
 	ModifyDate         string `orm:"column(modify_date);size(20)"` // 最后一次扣费成功时间
-	FinalMtType        string //最后一次扣费的类型
-	CanvasID           string `orm:"column(canvas_id)"` // 帆布ID
+	FinalMtType        string                                      //最后一次扣费的类型
+	CanvasID           string `orm:"column(canvas_id)"`            // 帆布ID
 }
 
 //Postback 网盟信息
@@ -193,6 +193,6 @@ type ClickData struct {
 }
 
 func init() {
-	orm.RegisterModel(new(AffTrack), new(Notification), new(Postback), new(Mo),
+	orm.RegisterModel(
 		new(ClickData), new(EveryDaySubDatas))
 }

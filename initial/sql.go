@@ -7,7 +7,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/lib/pq"
 
-	_ "github.com/MobileCPX/PreDimoco/models"
+	_ "github.com/MobileCPX/PreDimoco/models/dimoco"
 )
 
 func InitSql() {
@@ -22,6 +22,7 @@ func InitSql() {
 	if beego.AppConfig.String("runmode") == "dev" {
 		orm.Debug = true
 	}
+	orm.Debug = true
 	orm.DefaultRowsLimit = -1
 	orm.RegisterDriver("postgres", orm.DRPostgres) // 注册驱动
 	orm.RegisterDataBase("default",

@@ -104,6 +104,7 @@ func (c *NotificationControllers) Post() {
 	var resultBody result
 	data := c.Ctx.Request.PostFormValue("data")
 	digest := c.Ctx.Request.PostFormValue("digest")
+	logs.Info(string(data))
 
 	ecoder := xml.Unmarshal([]byte(data), &resultBody)
 	if ecoder != nil {

@@ -2,21 +2,22 @@ package sub
 
 import (
 	"encoding/xml"
-	"strconv"
-
+	"fmt"
 	"github.com/MobileCPX/PreDimoco/conf"
 	"github.com/MobileCPX/PreDimoco/httpRequest"
 	"github.com/MobileCPX/PreDimoco/models"
+	"github.com/MobileCPX/PreDimoco/models/notification"
 	"github.com/MobileCPX/PreDimoco/models/sub"
-	"github.com/MobileCPX/PreDimoco/utils"
+	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego"
+	"strconv"
 )
 
 type IdentifyControllers struct {
 	beego.Controller
 }
 
-type result struct {
+type Result struct {
 	ActionResult actionResult `xml:"action_result"`
 	Reference    string       `xml:"reference"`
 	RequestID    string       `xml:"request_id"`
@@ -38,16 +39,16 @@ func (c *IdentifyControllers) Get() {
 	affData.PubID = c.GetString("p")
 	affData.ClickID = c.GetString("click")
 	id := sub.InsertClickData(affData)
-
-	requestBody, encodeMessage := models.GetRequestBody(strconv.Itoa(int(id)), "identify", "")
-	digest := utils.HmacSha256([]byte(encodeMessage), []byte(conf.Conf.Secret))
+	fmt.Println(id)
+	requestBody, encodeMessage := models.GetRequestBody(strconv.Itoa(int(id)), "identify", "", "")
+	digest := util.HmacSha256([]byte(encodeMessage), []byte(conf.Conf.Secret))
 	requestBody["digest"] = digest
 	respBody, err := httpRequest.SendRequest(requestBody, conf.Conf.ServerURL)
 	if err != nil {
 		c.Redirect("http://google.com", 302)
 		return
 	}
-	identifyResult := result{}
+	identifyResult := Result{}
 	err = xml.Unmarshal(respBody, &identifyResult)
 	if err != nil {
 		c.Redirect("http://google.com", 302)
@@ -68,6 +69,20 @@ type IdentifyReturnControllers struct {
 
 func (c *IdentifyReturnControllers) Get() {
 	track := c.GetString("track")
+
+	if track != "" {
+		identifyNoti := notification.GetIdentiryNotification(track)
+		msisdn := identifyNoti.Msisdn
+		// 检查用户是否已经订阅
+		if msisdn != "" {
+			mo := notification.GetMoOrderByMsisdn(msisdn)
+			if mo.ID != 0 {
+				c.Redirect("http://www.c4fungames.com?subID="+mo.Msisdn, 302)
+				c.StopRun()
+			}
+		}
+	}
+
 	url := "http://www.c4fungames.com/dm/pl/lp?track=" + track
 	c.Redirect(url, 302)
 }

@@ -8,6 +8,23 @@ import (
 
 var Conf *Config
 
+const (
+	//UnsubSuccessCode 退订成功
+	UnsubSuccessCode = "0"
+
+	//MsisdnIsEmptyCode 退订电话号码为空
+	MsisdnIsEmptyCode = "-1"
+
+	//MsisdnNotExistCode 退订电话号码不存在
+	MsisdnNotExistCode = "-2"
+
+	// XMLErrorCode xml解析错误
+	XMLErrorCode = "-3"
+
+	//UnsubFaieldCode  退订失败
+	UnsubFaieldCode = "-4"
+)
+
 // Config Lancio 配置
 type Config struct {
 	Order         string `json:"order"`
