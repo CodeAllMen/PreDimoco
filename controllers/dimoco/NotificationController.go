@@ -8,6 +8,7 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
+// 接收通知流程
 type NotificationController struct {
 	BaseController
 }

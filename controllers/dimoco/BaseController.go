@@ -6,6 +6,7 @@ import (
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -65,9 +66,18 @@ func (c *BaseController) NewInsertMo(notification *dimoco.Notification, affTrack
 	return
 }
 
+func (c *BaseController) getServiceConfig(serviceID string) dimoco.ServiceInfo {
+	serviceConfig, isExist := c.serviceCofig(serviceID)
+	if !isExist {
+		logs.Error("Click4FunGameIdentify 服务名称不存在，请检查服务信息，servideID: ", serviceID)
+		c.redirect("http://www.google.com")
+	}
+	return serviceConfig
+}
+
 func (c *BaseController) serviceCofig(serviceID string) (dimoco.ServiceInfo, bool) {
-	serviceCofig, isExist := dimoco.ServiceData[serviceID]
-	return serviceCofig, isExist
+	serviceConfig, isExist := dimoco.ServiceData[serviceID]
+	return serviceConfig, isExist
 }
 
 // setCookie
@@ -117,4 +127,25 @@ func (c *BaseController) splitReuestIDToTrackID(requestID string) (trackID strin
 		trackID = result[0]
 	}
 	return
+}
+
+// 将string 类型的trackID 转为 INT 类型
+func (c *BaseController) trackIDStrToInt(trackID string) int {
+	trackIDInt, err := c.strToInt(trackID)
+	if err != nil {
+		logs.Error("trackID string to int 错误，ERROR: ", err.Error(), " trackID: ", trackID)
+		c.redirect("http://google.com")
+	}
+	return trackIDInt
+}
+
+func (c *BaseController) strToInt(str string) (int, error) {
+	return strconv.Atoi(str)
+}
+
+// 解析xml数据
+func (c *BaseController) UnmarshalXMLData(data []byte, v interface{}) {
+	reflect.TypeOf(v)
+
+	//err := xml.Unmarshal(data, v)
 }

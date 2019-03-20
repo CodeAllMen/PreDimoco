@@ -1,24 +1,21 @@
 package main
 
 import (
-	"github.com/MobileCPX/PreDimoco/conf"
 	"github.com/MobileCPX/PreDimoco/controllers/searchAPI"
 	_ "github.com/MobileCPX/PreDimoco/initial"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
 	_ "github.com/MobileCPX/PreDimoco/routers"
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"github.com/robfig/cron"
 )
 
 func init(){
-	dimoco.InitServiceConfig()
-	logs.Info(dimoco.ServiceData)
+	dimoco.InitServiceConfig()  // 初始化服务配置
+	task()  // 执行
 }
 
 func main() {
-	conf.NewConf()
-	task()
+
 	searchAPI.AffClickData()
 	beego.Run()
 }

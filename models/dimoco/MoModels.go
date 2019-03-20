@@ -218,6 +218,21 @@ func GetTodayMoNum(serviceID string) (int64, error) {
 	return subNum, err
 }
 
+func CheckTodaySubNumLimit(serviceID string, limitSubNum int) (isLimitSub bool) {
+	o := orm.NewOrm()
+	_, nowDate := util.GetFormatTime()
+	subNum, err := o.QueryTable(MoTBName()).Filter("service_id", serviceID).Filter("subtime__gt", nowDate).Count()
+	if err != nil {
+		logs.Error("GetTodaySubNum ", serviceID, " 获取今日的订阅数量失败 ERROR: ", err.Error())
+	}
+	logs.Info("GetTodaySubNum ", serviceID, "  今日的订阅数量: ", subNum, " 现在订阅数量： ", limitSubNum)
+	if int(subNum) > limitSubNum {
+		logs.Info(serviceID+": 今日订阅数超过限制 今日订阅: ", subNum, " 限制：", limitSubNum, "跳转到谷歌页面")
+		isLimitSub = true
+	}
+	return
+}
+
 // 根据电话号码获取MO信息
 func (mo *Mo) GetMoOrderByMsisdn(msisdn string) error {
 	o := orm.NewOrm()

@@ -3,15 +3,13 @@ package dimoco
 import (
 	"encoding/xml"
 	"github.com/MobileCPX/PreDimoco/enums"
-	"github.com/MobileCPX/PreDimoco/httpRequest"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
-	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego/logs"
 	"strconv"
 	"strings"
 )
 
-// LPTrackControllers 存储点击
+// SubFlowController 订阅流程
 type SubFlowController struct {
 	BaseController
 }
@@ -25,39 +23,24 @@ func (c *SubFlowController) Click4FunGameIdentify() {
 	affTrack.ServiceName = "Click4FunGame"
 	affTrack.ServiceID = "111814"
 	trackID, err := affTrack.Insert()
+
 	// 获取今日订阅数量，判断是否超过订阅限制
-	todaySubNum, err1 := dimoco.GetTodayMoNum(affTrack.ServiceID)
-	if (err != nil || err1 != nil || int(todaySubNum) >= enums.DayLimitSub) && affTrack.AffName != "" {
-		if int(todaySubNum) >= enums.DayLimitSub {
-			logs.Info(affTrack.ServiceName+" 今日订阅数超过限制 今日订阅: ", todaySubNum, " 限制：", enums.DayLimitSub)
-		}
+	isLimitSub := dimoco.CheckTodaySubNumLimit(affTrack.ServiceID, enums.DayLimitSub)
+	if (err != nil || isLimitSub) && affTrack.AffName != "" {
 		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
 		c.StopRun()
 	}
+
 	// 获取 Click4FunGame 的服务配置信息
-	gameServiceInfo, isExist := c.serviceCofig(affTrack.ServiceID)
-	if !isExist {
-		logs.Error("Click4FunGameIdentify 服务名称不存在，请检查服务信息，servideName: ", affTrack.ServiceName)
-		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
-		c.StopRun()
-	}
+	gameServiceInfo := c.getServiceConfig(affTrack.ServiceID)
 
-	//dimoco.
-
-	//// identify 请求数据
-	//requestBody, encodeMessage := dimoco.GetRequestBody(gameServiceInfo, strconv.Itoa(int(trackID)), "identify", "", "")
-	//// 加密请求字段
-	//digest := util.HmacSha256([]byte(encodeMessage), []byte(gameServiceInfo.Secret))
-	//requestBody["digest"] = digest
-	//// 发起请求
-	//respBody, err := httpRequest.SendRequest(requestBody, gameServiceInfo.ServerURL)
-
-	resp, err := dimoco.UserIdentifyRequest(gameServiceInfo, strconv.Itoa(int(trackID)), "", "")
+	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, strconv.Itoa(int(trackID)), "", "")
 	if err != nil {
 		logs.Error("Click4FunGameIdentify SendRequest 失败， ERROR： ", err.Error())
 		c.redirect("http://google.com")
 	}
 
+	// 解析xml返回数据
 	identifyResult := new(dimoco.Result)
 	err = xml.Unmarshal(resp, identifyResult)
 	if err != nil {
@@ -66,7 +49,7 @@ func (c *SubFlowController) Click4FunGameIdentify() {
 	}
 
 	// identify 获取到跳转链接后跳转
-	if identifyResult.ActionResult.Status == 3 {
+	if identifyResult.ActionResult.Status == enums.RequestSuccess {
 		redirectURL := identifyResult.ActionResult.RedirectURL.URL
 		c.redirect(redirectURL)
 	} else {
@@ -83,51 +66,49 @@ func (c *SubFlowController) IdentifyReturn() {
 	trackID := c.GetString("track")
 	logs.Info("IdentifyReturn trackID", trackID)
 	track, err := dimoco.GetServiceIDByTrackID(trackID)
-	//logs.Info("IdentifyReturn trackID",trackID)
+
 	if err != nil {
 		c.redirect("http://google.com")
 	}
-	serviceInfo, isExist := c.serviceCofig(track.ServiceID)
-	if !isExist {
-		logs.Error("Click4FunGameIdentify 服务名称不存在，请检查服务信息，servideID: ", track.ServiceID)
-		c.redirect("https://google.com")
-	}
+
+	// 根据serviceID 获取服务配置信息
+	serviceConfig := c.getServiceConfig(track.ServiceID)
 
 	identifyNotify := new(dimoco.Notification)
 	err = identifyNotify.GetIdentifyNotificationByTrackID(trackID)
 	if err != nil {
 		c.redirect("https://google.com")
 	}
+
 	msisdn := identifyNotify.Msisdn
-	// 检查用户是否已经订阅
+	// 通过电话检查用户是否已经订阅,已经订阅的用户直接跳转到内容站
 	if msisdn != "" {
 		mo := new(dimoco.Mo)
 		_ = mo.GetMoOrderByMsisdn(msisdn)
 		if mo.ID != 0 {
-			c.redirect(serviceInfo.ContentURL + "?subID=" + mo.Msisdn)
+			c.redirect(serviceConfig.ContentURL + "?subID=" + mo.Msisdn)
 		}
 	}
 
-	LpURL := serviceInfo.LpURL + "?track=" + trackID
+	LpURL := serviceConfig.LpURL + "?track=" + trackID
 	c.redirect(LpURL)
 }
 
-// Identify 标识用户后的重定向地址及开始订阅用户
+// LP页面点击订阅按钮 ，开始跳转到支付页面
 func (c *SubFlowController) StartSub() {
-	// 获取trackUD
+	// 获取trackID 将trackID 转为int 类型
 	trackID := c.GetString("track")
-	track, err := dimoco.GetServiceIDByTrackID(trackID)
+	trackIDInt := c.trackIDStrToInt(trackID)
+
+	track := new(dimoco.AffTrack)
+	err := track.GetAffTrackByTrackID(int64(trackIDInt))
 	if err != nil {
 		c.redirect("http://google.com")
 	}
-	serviceConfig, isExist := c.serviceCofig(track.ServiceID)
-	if !isExist {
-		logs.Error("Click4FunGameIdentify 服务名称不存在，请检查服务信息，servideID: ", track.ServiceID)
-	}
-	requestBody, encodeMessage := dimoco.GetRequestBody(serviceConfig, trackID, "start-subscription", "", "")
-	digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceConfig.Secret))
-	requestBody["digest"] = digest
-	respBody, err := httpRequest.SendRequest(requestBody, serviceConfig.ServerURL)
+
+	serviceConfig := c.getServiceConfig(track.ServiceID)
+	respBody, err := dimoco.DimocoRequest(serviceConfig, enums.StartSubRequest, trackID, "", "")
+
 	if err != nil {
 		c.Redirect("http://google.com", 302)
 		return
@@ -144,12 +125,13 @@ func (c *SubFlowController) StartSub() {
 	if err != nil {
 		c.redirect("http://google.com")
 	}
+
 	// 更新 affTrack 表 存入request_id 信息
 	track.RequestID = identifyResult.RequestID
 	_ = track.Update()
 
 	// start-sub 获取到跳转链接后跳转
-	if identifyResult.ActionResult.Status == 3 {
+	if identifyResult.ActionResult.Status == enums.RequestSuccess {
 		redirectURL := identifyResult.ActionResult.RedirectURL.URL
 		c.redirect(redirectURL)
 	} else {

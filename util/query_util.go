@@ -4,8 +4,6 @@ import (
 	"reflect"
 	"sort"
 	"time"
-
-	"github.com/MobileCPX/PreNTH/conf"
 )
 
 // GetFormatHoursTime 获取当前格式化时间  格式为 2006-01-02 15
@@ -60,28 +58,10 @@ func Duplicate(a []string) (ret []string) {
 	sort.Strings(a)
 	va := reflect.ValueOf(a)
 	for i := 0; i < va.Len(); i++ {
-		if i > 0 && reflect.DeepEqual(va.Index(i-1).Interface(), va.Index(i).Interface()) {
+		if i > 0 && reflect.DeepEqual(va.Index(i - 1).Interface(), va.Index(i).Interface()) {
 			continue
 		}
 		ret = append(ret, va.Index(i).String())
 	}
 	return ret
-}
-
-// GetServiceType 根据服务短码获取国家及服务类型
-func GetServiceType(serviceCode string) string {
-	var serviceType string
-	switch serviceCode {
-	case "NL030070":
-		serviceType = conf.NLRedlightvideosName
-	case "NL030076":
-		serviceType = conf.NLHotvideoName
-	case "NL030077":
-		serviceType = conf.NLGogamehubName
-	case "NL030080":
-		serviceType = conf.NLIfunnyName
-	case "NL030081":
-		serviceType = conf.NLPorn4KName
-	}
-	return serviceType
 }

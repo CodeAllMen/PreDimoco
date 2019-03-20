@@ -2,6 +2,7 @@ package dimoco
 
 import (
 	"fmt"
+	"github.com/MobileCPX/PreDimoco/enums"
 	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego/logs"
 	"io/ioutil"
@@ -13,20 +14,23 @@ import (
 	"github.com/MobileCPX/PreDimoco/conf"
 )
 
-const (
-	UserIdentify    = "identify"           // 用户标识
-	StartSubRequest = "start-subscription" // 订阅请求
-	UnsubReuqest    = "close-subscription" // 退订请求
-)
-
-func UserIdentifyRequest(serviceConfig ServiceInfo, trackID, subID, requestType string) ([]byte, error) {
-	requestBody, encodeMessage := GetRequestBody(serviceConfig, trackID, UserIdentify, subID, requestType)
+func DimocoRequest(serviceConfig ServiceInfo, requestType, trackID string, subID string, types string) ([]byte, error) {
+	requestBody, encodeMessage := GetRequestBody(serviceConfig, trackID, requestType, subID, subID)
 	// 加密请求字段
 	digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceConfig.Secret))
 	requestBody["digest"] = digest
 	// 发起请求
 	return sendRequest(requestBody, serviceConfig.ServerURL)
 }
+
+//func StartSubscriptionRequest(serviceConfig ServiceInfo, trackID string) ([]byte, error) {
+//	requestBody, encodeMessage := GetRequestBody(serviceConfig, trackID, StartSubRequest, "", "")
+//	// 加密请求字段
+//	digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceConfig.Secret))
+//	requestBody["digest"] = digest
+//	// 发起请求
+//	return sendRequest(requestBody, serviceConfig.ServerURL)
+//}
 
 func sendRequest(values map[string]string, URL string) ([]byte, error) {
 	//这里添加post的body内容
@@ -46,9 +50,7 @@ func sendRequest(values map[string]string, URL string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(responseData))
 	return responseData, err
-
 }
 
 func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string, types string) (map[string]string, string) {
@@ -60,7 +62,7 @@ func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string
 	timeStr := strconv.Itoa(int(timeUnix))
 	encodeMessage := ""
 	switch requestType {
-	case UserIdentify:
+	case enums.UserIdentify:
 		requestBody["request_id"] = trackID + "_identify" + "_" + timeStr
 		requestBody["url_callback"] = serviceCofig.NotificationURL
 		requestBody["url_return"] = serviceCofig.IdentifySubURLReturn + "?track=" + trackID
@@ -71,7 +73,7 @@ func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string
 		}
 		encodeMessage = requestBody["action"] + requestBody["merchant"] + requestBody["order"] +
 			requestBody["request_id"] + requestBody["url_callback"] + requestBody["url_return"]
-	case StartSubRequest:
+	case enums.StartSubRequest:
 		requestBody["request_id"] = trackID + "_sub" + "_" + timeStr
 		requestBody["service_name"] = conf.Conf.ServiceName
 		requestBody["url_callback"] = serviceCofig.NotificationURL
@@ -85,7 +87,7 @@ func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string
 			requestBody["manage_subscription_url_callback"] + requestBody["merchant"] + requestBody["order"] +
 			requestBody["prompt_merchant_args"] + requestBody["prompt_product_args"] +
 			requestBody["request_id"] + requestBody["service_name"] + requestBody["url_callback"] + requestBody["url_return"]
-	case UnsubReuqest:
+	case enums.UnsubReuqest:
 		requestBody["request_id"] = trackID + "_unsub" + "_" + timeStr
 		requestBody["subscription"] = subID
 		requestBody["url_callback"] = serviceCofig.NotificationURL

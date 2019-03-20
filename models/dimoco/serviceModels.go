@@ -1,7 +1,6 @@
 package dimoco
 
 import (
-	"github.com/astaxie/beego/orm"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
@@ -53,25 +52,4 @@ func InitServiceConfig() {
 		panic(err)
 	}
 	ServiceData = config.Service
-
-	o := orm.NewOrm()
-	for _, v := range ServiceData {
-		_, _ = o.Insert(&v)
-	}
-
 }
-
-//func (server *ServiceInfo) GetServiceInfo() (*ServiceInfo, error) {
-//	mapServer := ServiceData[server.ServiceID]
-//	if mapServer.ServiceID != "" {
-//		return &mapServer, nil
-//	} else {
-//		o := orm.NewOrm()
-//		err := o.Read(server)
-//		if err != nil {
-//			logs.Error("查询服务失败 serverID: ", server.ServiceID)
-//		}
-//		return server, err
-//	}
-//
-//}

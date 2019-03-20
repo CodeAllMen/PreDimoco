@@ -90,9 +90,11 @@ func GetServiceIDByTrackID(trackID string) (*AffTrack, error) {
 
 	track.TrackID = int64(trackIDInt)
 	err = o.Read(track)
+
 	if err != nil {
 		logs.Error("GetServiceIDByTrackID 通过trackID 查询aff_track 表失败，ERROR: ", err.Error(), " trackID: ", trackID)
 		return track, errors.New("没有查询到数据")
 	}
 	return track, err
 }
+
