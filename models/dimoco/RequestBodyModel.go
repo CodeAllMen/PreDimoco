@@ -10,8 +10,6 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-
-	"github.com/MobileCPX/PreDimoco/conf"
 )
 
 func DimocoRequest(serviceConfig ServiceInfo, requestType, trackID string, subID string, types string) ([]byte, error) {
@@ -75,7 +73,8 @@ func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string
 			requestBody["request_id"] + requestBody["url_callback"] + requestBody["url_return"]
 	case enums.StartSubRequest:
 		requestBody["request_id"] = trackID + "_sub" + "_" + timeStr
-		requestBody["service_name"] = conf.Conf.ServiceName
+		//requestBody["service_name"] = conf.Conf.ServiceName
+		requestBody["service_name"] = serviceCofig.ServiceName
 		requestBody["url_callback"] = serviceCofig.NotificationURL
 		requestBody["url_return"] = serviceCofig.StartSubscriptionURLReturn + "?track=" + trackID
 		requestBody["prompt_product_args"] = serviceCofig.PromptProductArgs

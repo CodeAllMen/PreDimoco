@@ -226,7 +226,7 @@ func CheckTodaySubNumLimit(serviceID string, limitSubNum int) (isLimitSub bool) 
 		logs.Error("GetTodaySubNum ", serviceID, " 获取今日的订阅数量失败 ERROR: ", err.Error())
 	}
 	logs.Info("GetTodaySubNum ", serviceID, "  今日的订阅数量: ", subNum, " 现在订阅数量： ", limitSubNum)
-	if int(subNum) > limitSubNum {
+	if int(subNum) >= limitSubNum {
 		logs.Info(serviceID+": 今日订阅数超过限制 今日订阅: ", subNum, " 限制：", limitSubNum, "跳转到谷歌页面")
 		isLimitSub = true
 	}

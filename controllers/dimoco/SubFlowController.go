@@ -4,9 +4,11 @@ import (
 	"encoding/xml"
 	"github.com/MobileCPX/PreDimoco/enums"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
+	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego/logs"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // SubFlowController 订阅流程
@@ -22,10 +24,22 @@ func (c *SubFlowController) Click4FunGameIdentify() {
 	affTrack.ClickID = c.GetString("clickId")
 	affTrack.ServiceName = "Click4FunGame"
 	affTrack.ServiceID = "111814"
+	affTrack.UserAgent = c.Ctx.Input.UserAgent()
+	affTrack.IP = util.GetIpAddress(c.Ctx.Request)
 	trackID, err := affTrack.Insert()
+
+	// 检查订阅时间是否在奥地利时间的8点到10点之间
+	subTimeStatus := CheckSubTime(7, 21)
+
+	if !subTimeStatus {
+		logs.Info("订阅时间不在8点到10点之间，跳转到谷歌页面")
+		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
+		c.StopRun()
+	}
 
 	// 获取今日订阅数量，判断是否超过订阅限制
 	isLimitSub := dimoco.CheckTodaySubNumLimit(affTrack.ServiceID, enums.DayLimitSub)
+	//isLimitSub = true
 	if (err != nil || isLimitSub) && affTrack.AffName != "" {
 		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
 		c.StopRun()
@@ -164,4 +178,14 @@ func (c *SubFlowController) StartSubReturn() {
 	}
 	url := serviceInfo.WelcomePageURL + "?" + result
 	c.Redirect(url, 302)
+}
+
+func CheckSubTime(start, end int) (status bool) {
+	time.LoadLocation("UTC")
+	nowHours := time.Now().UTC().Format("15")
+	intHours, _ := strconv.Atoi(nowHours)
+	if intHours >= start && intHours < end {
+		status = true
+	}
+	return
 }
