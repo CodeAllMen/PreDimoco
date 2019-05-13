@@ -242,3 +242,13 @@ func (mo *Mo) GetMoOrderByMsisdn(msisdn string) error {
 	}
 	return err
 }
+
+// 根据电话号码获取MO信息
+func (mo *Mo) GetMoOrderByMsisdnByTest(msisdn, serviceID string) error {
+	o := orm.NewOrm()
+	err := o.QueryTable("mo").Filter("msisdn", msisdn).Filter("service_id", serviceID).OrderBy("-id").One(mo)
+	if err != nil {
+		logs.Error("GetMoOrderByMsisdn ERROR", err.Error())
+	}
+	return err
+}

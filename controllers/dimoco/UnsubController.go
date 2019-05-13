@@ -31,47 +31,48 @@ type userIDToken struct {
 
 //  UnsubWap3G WAP 3G环境下退订
 func (c *UnsubController) UnsubWap3G() {
-	msisdn := c.GetString("msisdn")
+	logs.Info("UnsubWap3G", c.Ctx.Input.URI())
+	subID := c.GetString("msisdn")
 	serviceID := c.GetString("service_id")
 	if serviceID == "" {
 		serviceID = "111814"
 	}
 	serviceInfo, _ := c.serviceCofig(serviceID)
-	logs.Info("退订的电话号码", msisdn)
-	mo := new(dimoco.Mo)
-	if msisdn != "" {
-		mo.GetMoByMsisdnAndServiceID(msisdn, serviceID)
-		subID := unsub.MsisdnGetSubID(msisdn)
-		if subID != "" {
-			requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, subID, "close-subscription", subID, "")
-			digest := util.HmacSha256([]byte(encodeMessage), []byte(conf.Conf.Secret))
-			requestBody["digest"] = digest
-			respBody, err := httpRequest.SendRequest(requestBody, conf.Conf.ServerURL)
-			logs.Info("请求退订的返回数据", string(respBody), err)
-			if err != nil {
-				redirectURL := serviceInfo.UnsubResultURL
-				c.redirect(redirectURL + "?code=" + conf.XMLErrorCode)
-				return
-			}
-			identifyResult := new(dimoco.Result)
-			err = xml.Unmarshal(respBody, identifyResult)
-			if identifyResult.ActionResult.Status == 3 {
-				redirectURL := identifyResult.ActionResult.RedirectURL.URL
-				c.Redirect(redirectURL, 302)
-				return
-			} else if identifyResult.ActionResult.Status == 5 {
-				redirectURL := serviceInfo.CloseSubscriptionURLReturn + "?subID=" + subID + "&service_name=" + serviceID
-				c.Redirect(redirectURL, 302)
-				return
-			}
-			logs.Info("退订请求数据：", requestBody, "\n 退订响应数据：", string(respBody))
+	logs.Info("退订的SubID", subID)
+	//mo := new(dimoco.Mo)
+	//if msisdn != "" {
+	//mo.GetMoByMsisdnAndServiceID(msisdn, serviceID)
+	//subID := unsub.MsisdnGetSubID(msisdn)
+	if subID != "" {
+		requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, subID, "close-subscription", subID, "")
+		digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceInfo.Secret))
+		requestBody["digest"] = digest
+		respBody, err := httpRequest.SendRequest(requestBody, serviceInfo.ServerURL)
+		logs.Info("请求退订的返回数据", string(respBody), err)
+		if err != nil {
+			redirectURL := serviceInfo.UnsubResultURL
+			c.redirect(redirectURL + "?code=" + conf.XMLErrorCode)
+			return
 		}
+		identifyResult := new(dimoco.Result)
+		err = xml.Unmarshal(respBody, identifyResult)
+		if identifyResult.ActionResult.Status == 3 {
+			redirectURL := identifyResult.ActionResult.RedirectURL.URL
+			c.Redirect(redirectURL, 302)
+			return
+		} else if identifyResult.ActionResult.Status == 5 {
+			redirectURL := serviceInfo.CloseSubscriptionURLReturn + "?subID=" + subID + "&service_id=" + serviceID
+			c.Redirect(redirectURL, 302)
+			return
+		}
+		logs.Info("退订请求数据：", requestBody, "\n 退订响应数据：", string(respBody))
 	}
+	//}
 
 	requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, strconv.Itoa(int(1122)), "identify", "", "unsub")
-	digest := util.HmacSha256([]byte(encodeMessage), []byte(conf.Conf.Secret))
+	digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceInfo.Secret))
 	requestBody["digest"] = digest
-	respBody, err := httpRequest.SendRequest(requestBody, conf.Conf.ServerURL)
+	respBody, err := httpRequest.SendRequest(requestBody, serviceInfo.ServerURL)
 	identifyResult := sub.Result{}
 	err = xml.Unmarshal(respBody, &identifyResult)
 	if err != nil {
@@ -89,6 +90,7 @@ func (c *UnsubController) UnsubWap3G() {
 }
 
 func (c *UnsubController) MsisdnUnsub() {
+	logs.Info("MsisdnUnsub", c.Ctx.Input.URI())
 	msisdn := c.GetString("msisdn")
 	logs.Info("退订的电话号码", msisdn)
 	serviceID := c.GetString("service_id")
@@ -102,9 +104,9 @@ func (c *UnsubController) MsisdnUnsub() {
 		//subID := unsub.MsisdnGetSubID(msisdn)
 		if err == nil && mo.SubscriptionID != "" {
 			requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, mo.SubscriptionID, "close-subscription", mo.SubscriptionID, "")
-			digest := util.HmacSha256([]byte(encodeMessage), []byte(conf.Conf.Secret))
+			digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceInfo.Secret))
 			requestBody["digest"] = digest
-			respBody, err := httpRequest.SendRequest(requestBody, conf.Conf.ServerURL)
+			respBody, err := httpRequest.SendRequest(requestBody, serviceInfo.ServerURL)
 			logs.Info("请求退订的返回数据", string(respBody), err)
 			if err != nil {
 				// c.Redirect("http://google.com", 302)
@@ -136,6 +138,7 @@ func (c *UnsubController) MsisdnUnsub() {
 }
 
 func (c *UnsubController) UnsubIdentify() {
+	logs.Info("UnsubIdentify", c.Ctx.Input.URI())
 	track := c.GetString("track")
 	serviceID := c.GetString("service_id")
 	serviceConfig, isExist := c.serviceCofig(serviceID)
@@ -150,9 +153,9 @@ func (c *UnsubController) UnsubIdentify() {
 		if identifyNotify.SubscriptionID != "" {
 
 			requestBody, encodeMessage := dimoco.GetRequestBody(serviceConfig, identifyNotify.SubscriptionID, "close-subscription", identifyNotify.SubscriptionID, "")
-			digest := util.HmacSha256([]byte(encodeMessage), []byte(conf.Conf.Secret))
+			digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceConfig.Secret))
 			requestBody["digest"] = digest
-			respBody, err := httpRequest.SendRequest(requestBody, conf.Conf.ServerURL)
+			respBody, err := httpRequest.SendRequest(requestBody, serviceConfig.ServerURL)
 			logs.Info("请求退订的返回数据", string(respBody), err)
 			if err != nil {
 				// c.Redirect("http://google.com", 302)
@@ -182,6 +185,7 @@ func (c *UnsubController) UnsubIdentify() {
 }
 
 func (c *UnsubController) UnsubReturn() {
+	logs.Info("UnsubReturn", c.Ctx.Input.URI())
 	subID := c.GetString("subID")
 	serviceID := c.GetString("service_id")
 	serviceInfo, _ := c.serviceCofig(serviceID)
@@ -210,5 +214,6 @@ func (c *UnsubController) UnsubReturn() {
 		}
 	}
 	fmt.Println(status)
+	fmt.Println(serviceInfo.UnsubResultURL)
 	c.Redirect(serviceInfo.UnsubResultURL+"?code="+status, 302)
 }

@@ -16,6 +16,66 @@ type SubFlowController struct {
 	BaseController
 }
 
+func (c *SubFlowController) TotalServiceIdentify() {
+	affTrack := new(dimoco.AffTrack) // 每次点击存入此次点击的相关数据
+	affTrack.AffName = c.GetString("affName")
+	affTrack.PubID = c.GetString("pubId")
+	affTrack.ProID = c.GetString("proId")
+	affTrack.ClickID = c.GetString("clickId")
+	affTrack.ServiceID = c.GetString("service_id")
+	affTrack.ServiceName = c.GetString("service_name")
+	//affTrack.ServiceName = "Click4FunGame"
+	//affTrack.ServiceID = "111814"
+	affTrack.UserAgent = c.Ctx.Input.UserAgent()
+	affTrack.IP = util.GetIpAddress(c.Ctx.Request)
+	trackID, err := affTrack.Insert()
+
+	// 检查订阅时间是否在奥地利时间的8点到10点之间
+	subTimeStatus := CheckSubTime(7, 21)
+
+	if !subTimeStatus && affTrack.AffName != "" {
+		logs.Info("订阅时间不在8点到10点之间，跳转到谷歌页面")
+		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
+		c.StopRun()
+	}
+
+	// 获取今日订阅数量，判断是否超过订阅限制
+	isLimitSub := dimoco.CheckTodaySubNumLimit(affTrack.ServiceID, enums.DayLimitSub)
+	if (err != nil || isLimitSub) && affTrack.AffName != "" {
+		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
+		c.StopRun()
+	}
+
+	// 获取 Click4FunGame 的服务配置信息
+	gameServiceInfo := c.getServiceConfig(affTrack.ServiceID)
+
+	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, strconv.Itoa(int(trackID)), "", "")
+	if err != nil {
+		logs.Error("Click4FunGameIdentify SendRequest 失败， ERROR： ", err.Error())
+		c.redirect("http://google.com")
+	}
+
+	// 解析xml返回数据
+	identifyResult := new(dimoco.Result)
+	err = xml.Unmarshal(resp, identifyResult)
+	if err != nil {
+		logs.Error("Click4FunGameIdentify 解析XML失败， ERROR： ", err.Error())
+		c.redirect("http://google.com")
+	}
+
+	// identify 获取到跳转链接后跳转
+	if identifyResult.ActionResult.Status == enums.RequestSuccess {
+		redirectURL := identifyResult.ActionResult.RedirectURL.URL
+		c.redirect(redirectURL)
+	} else {
+		redirectURL := "http://google.com"
+		if identifyResult.ActionResult.RedirectURL.URL != "" {
+			redirectURL = identifyResult.ActionResult.RedirectURL.URL
+		}
+		c.redirect(redirectURL)
+	}
+}
+
 func (c *SubFlowController) Click4FunGameIdentify() {
 	affTrack := new(dimoco.AffTrack) // 每次点击存入此次点击的相关数据
 	affTrack.AffName = c.GetString("affName")
@@ -31,7 +91,7 @@ func (c *SubFlowController) Click4FunGameIdentify() {
 	// 检查订阅时间是否在奥地利时间的8点到10点之间
 	subTimeStatus := CheckSubTime(7, 21)
 
-	if !subTimeStatus {
+	if !subTimeStatus && affTrack.AffName != "" {
 		logs.Info("订阅时间不在8点到10点之间，跳转到谷歌页面")
 		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
 		c.StopRun()
@@ -98,9 +158,14 @@ func (c *SubFlowController) IdentifyReturn() {
 	// 通过电话检查用户是否已经订阅,已经订阅的用户直接跳转到内容站
 	if msisdn != "" {
 		mo := new(dimoco.Mo)
-		_ = mo.GetMoOrderByMsisdn(msisdn)
+		if serviceConfig.Order == "111814" {
+			_ = mo.GetMoOrderByMsisdn(msisdn)
+		} else {
+			_ = mo.GetMoOrderByMsisdnByTest(msisdn, serviceConfig.Order)
+		}
+
 		if mo.ID != 0 {
-			c.redirect(serviceConfig.ContentURL + "?subID=" + mo.Msisdn)
+			c.redirect(serviceConfig.ContentURL + "?subID=" + mo.SubscriptionID)
 		}
 	}
 

@@ -9,6 +9,7 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
+	beego.Router("/service/identify", &dimoco.SubFlowController{}, "Get:TotalServiceIdentify")
 
 	beego.Router("/identify", &dimoco.SubFlowController{}, "Get:Click4FunGameIdentify")
 
