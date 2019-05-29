@@ -2,6 +2,7 @@ package dimoco
 
 import (
 	"encoding/xml"
+	"fmt"
 	"github.com/MobileCPX/PreDimoco/enums"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
 	"github.com/MobileCPX/PreDimoco/util"
@@ -14,6 +15,103 @@ import (
 // SubFlowController 订阅流程
 type SubFlowController struct {
 	BaseController
+}
+
+func (c *SubFlowController) InsertAffClick() {
+	var campSubNum int64
+	var err error
+	track := new(dimoco.AffTrack)
+	track.ServiceID = c.GetString("service_id")
+	track.ServiceName = c.GetString("service_name")
+	// 处理传的参数，赋值
+	track = c.HandlerParameterToAffTrack(track)
+
+	// 存入点击信息
+
+	logs.Info("track.OfferID", track.OfferID)
+	if track.OfferID != 0 {
+
+		campID := dimoco.GetCampIDByOfferID(track.OfferID)
+		fmt.Println(campID, "!!!!!!!!!!!!!!!!")
+		if campID != 0 {
+			track.CampID = campID
+			mo := new(dimoco.Mo)
+			// 获取今日订阅数量，判断是否超过订阅限制
+			campSubNum, err = mo.GetCampTodaySubNum(campID)
+			if err != nil {
+				c.Ctx.WriteString("false")
+				c.StopRun()
+			}
+			logs.Info(track.ServiceID, "  campID: ", campID, " 今日订阅数量： ", campSubNum, " 限制订阅数量：", 50)
+			if campSubNum > 50 {
+				c.Ctx.WriteString("false")
+				c.StopRun()
+			}
+		} else {
+			c.Ctx.WriteString("false")
+			c.StopRun()
+		}
+	}
+	trackID, err := track.Insert()
+
+	if err != nil || int(campSubNum) >= enums.DayLimitSub {
+		if int(campSubNum) >= enums.DayLimitSub {
+			logs.Info(track.ServiceName+" 今日订阅数超过限制 今日订阅: ", campSubNum, " 限制：", enums.DayLimitSub)
+		}
+		c.Ctx.WriteString("false")
+		c.StopRun()
+	}
+
+	c.Ctx.WriteString(strconv.Itoa(int(trackID)))
+}
+
+func (c *SubFlowController) ServiceIdentify() {
+	trackID := c.GetString("track")
+	_, err := strconv.Atoi(trackID) // 检查是否为数字
+	if err != nil {
+		c.redirect("https://google.com")
+	}
+
+	affTrack, err := dimoco.GetServiceIDByTrackID(trackID)
+
+	// 检查订阅时间是否在奥地利时间的8点到10点之间
+
+	// 获取今日订阅数量，判断是否超过订阅限制
+	isLimitSub := dimoco.CheckTodaySubNumLimit(affTrack.ServiceID, enums.DayLimitSub)
+	//isLimitSub = true
+	if (err != nil || isLimitSub) && affTrack.AffName != "" {
+		c.Ctx.ResponseWriter.ResponseWriter.WriteHeader(404)
+		c.StopRun()
+	}
+
+	// 获取 Click4FunGame 的服务配置信息
+	gameServiceInfo := c.getServiceConfig(affTrack.ServiceID)
+
+	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, trackID, "", "")
+	if err != nil {
+		logs.Error("Click4FunGameIdentify SendRequest 失败， ERROR： ", err.Error())
+		c.redirect("http://google.com")
+	}
+
+	// 解析xml返回数据
+	identifyResult := new(dimoco.Result)
+	err = xml.Unmarshal(resp, identifyResult)
+	if err != nil {
+		logs.Error("Click4FunGameIdentify 解析XML失败， ERROR： ", err.Error())
+		c.redirect("http://google.com")
+	}
+
+	// identify 获取到跳转链接后跳转
+	if identifyResult.ActionResult.Status == enums.RequestSuccess {
+		redirectURL := identifyResult.ActionResult.RedirectURL.URL
+		c.redirect(redirectURL)
+	} else {
+		redirectURL := "http://google.com"
+		if identifyResult.ActionResult.RedirectURL.URL != "" {
+			redirectURL = identifyResult.ActionResult.RedirectURL.URL
+		}
+		c.redirect(redirectURL)
+	}
 }
 
 func (c *SubFlowController) TotalServiceIdentify() {
@@ -158,11 +256,11 @@ func (c *SubFlowController) IdentifyReturn() {
 	// 通过电话检查用户是否已经订阅,已经订阅的用户直接跳转到内容站
 	if msisdn != "" {
 		mo := new(dimoco.Mo)
-		if serviceConfig.Order == "111814" {
-			_ = mo.GetMoOrderByMsisdn(msisdn)
-		} else {
-			_ = mo.GetMoOrderByMsisdnByTest(msisdn, serviceConfig.Order)
-		}
+		//if serviceConfig.Order == "111814" {
+		_ = mo.GetMoOrderByMsisdn(msisdn)
+		//} else {
+		//	_ = mo.GetMoOrderByMsisdnByTest(msisdn, serviceConfig.Order)
+		//}
 
 		if mo.ID != 0 {
 			c.redirect(serviceConfig.ContentURL + "?subID=" + mo.SubscriptionID)

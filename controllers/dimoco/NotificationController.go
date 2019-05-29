@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/MobileCPX/PreDimoco/httpRequest"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
+	"github.com/MobileCPX/PreDimoco/models/sendData"
+	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego/logs"
 )
 
@@ -121,6 +123,7 @@ func (c *NotificationController) Post() {
 	chargeNotify.RequestID = resultBody.RequestID
 	chargeNotify.SubStatus = resultBody.Subscription.Status
 	chargeNotify.Order = resultBody.PaymentParameters.Order
+	chargeNotify.TransactionID = resultBody.Transactions.TransactionsID.ID
 	chargeNotify.XMLData = data
 	fmt.Println(chargeNotify, "##############", resultBody.Subscription)
 
@@ -149,7 +152,7 @@ func (c *NotificationController) Post() {
 			if trackID != "" {
 				track, _ = dimoco.GetServiceIDByTrackID(trackID)
 			}
-			chargeNotify.NotificationType = c.NewInsertMo(chargeNotify, track)
+			mo, chargeNotify.NotificationType = c.NewInsertMo(chargeNotify, track)
 		}
 	case "close-subscription":
 		chargeNotify.NotificationType, _ = mo.UnsubUpdateMo(chargeNotify.SubscriptionID)
@@ -157,12 +160,32 @@ func (c *NotificationController) Post() {
 	case "renew-subscription":
 		// 交易成功标识
 		if chargeNotify.ChargeStatus == "4" || chargeNotify.ChargeStatus == "5" {
-			chargeNotify.NotificationType, _ = mo.SuccessMTUpdateMO(chargeNotify.SubscriptionID)
+			chargeNotify.NotificationType, _ = mo.SuccessMTUpdateMO(chargeNotify.SubscriptionID, chargeNotify.TransactionID)
 		} else {
 			chargeNotify.NotificationType, _ = mo.FailedMTUpdateMo(chargeNotify.SubscriptionID)
 		}
 	}
 	_ = chargeNotify.Insert()
+
+	if chargeNotify.NotificationType != "" && mo.CampID != 0 {
+		nowTime, _ := util.GetNowTimeFormat()
+		sendNoti := new(sendData.SpNotification)
+		sendNoti.OfferID = mo.OfferID
+		sendNoti.SubscriptionID = mo.SubscriptionID
+		sendNoti.ServiceID = mo.ServiceID
+		sendNoti.ClickID = mo.ClickID
+		sendNoti.CampID = mo.CampID
+		sendNoti.PubID = mo.PubID
+		sendNoti.PostbackStatus = mo.PostbackStatus
+		sendNoti.PostbackMessage = mo.PostbackCode
+		sendNoti.TransactionID = chargeNotify.TransactionID
+		sendNoti.AffName = mo.AffName
+		sendNoti.Msisdn = mo.Msisdn
+		sendNoti.Operator = mo.Operator
+		sendNoti.Sendtime = nowTime
+		sendNoti.NotificationType = chargeNotify.NotificationType
+		sendNoti.SendData()
+	}
 
 	logs.Info("notification", data, digest)
 	c.Ctx.WriteString("OK")

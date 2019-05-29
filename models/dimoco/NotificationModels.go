@@ -10,6 +10,7 @@ import (
 type Notification struct {
 	ID               int64  `orm:"pk;auto;column(id)"`      //自增ID
 	SubscriptionID   string `orm:"column(subscription_id)"` // 订阅id
+	TransactionID    string `orm:"column(transaction_id)"`
 	Action           string
 	NotificationType string `orm:"column(notification_type)"` // 通知类型
 	Sendtime         string `orm:"column(sendtime);size(30)"` // 点击时间

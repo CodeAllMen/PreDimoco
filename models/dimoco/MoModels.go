@@ -8,34 +8,39 @@ import (
 
 // Mo mo表数据
 type Mo struct {
-	ID             int64  `orm:"pk;auto;column(id)"` //自增ID
-	Msisdn         string `orm:"size(255)"`
-	Operator       string `orm:"size(255)"`
-	SubStatus      int    `orm:"size(255)"`
-	SubscriptionID string `orm:"column(subscription_id);size(255)"`
-	Subtime        string `orm:"size(255)"`
-	Unsubtime      string `orm:"size(255)"`
-	SuccessMT      int    `orm:"size(255)"`
-	FailedMT       int    `orm:"size(255)"`
-	ServiceName    string
-	ServiceID      string `orm:"column(service_id);size(255)"`
-	AffName        string `orm:"size(255)"`
-	ClickID        string `orm:"column(click_id);size(255)"`
-	PubID          string `orm:"column(pub_id);size(100)"` // 子渠道
-	ProID          string `orm:"column(pro_id);size(30)"`  // 服务id（可有可无）
-	PostbackCode   string `orm:"size(255)"`
-	PostbackStatus int    `orm:"size(255)"`
-	Payout         float32
-	PostbackTime   string `orm:"size(255)"`
-	PostbackPayout float32
-	ModifyDate     string `orm:"size(255)"`
-	RenewalTime    string `orm:"size(255)"`
-	ClickType      string `orm:"size(15)"`
-	CanvasID       string `orm:"column(canvas_id)"` // 帆布ID
+	ID                int64  `orm:"pk;auto;column(id)"` //自增ID
+	Msisdn            string `orm:"size(255)"`
+	Operator          string `orm:"size(255)"`
+	SubStatus         int    `orm:"size(255)"`
+	SubscriptionID    string `orm:"column(subscription_id);size(255)"`
+	Subtime           string `orm:"size(255)"`
+	Unsubtime         string `orm:"size(255)"`
+	SuccessMT         int    `orm:"size(255)"`
+	FailedMT          int    `orm:"size(255)"`
+	ServiceName       string
+	ServiceID         string `orm:"column(service_id);size(255)"`
+	AffName           string `orm:"size(255)"`
+	ClickID           string `orm:"column(click_id);size(255)"`
+	PubID             string `orm:"column(pub_id);size(100)"` // 子渠道
+	ProID             string `orm:"column(pro_id);size(30)"`  // 服务id（可有可无）
+	PostbackCode      string `orm:"size(255)"`
+	PostbackStatus    int    `orm:"size(255)"`
+	Payout            float32
+	PostbackTime      string `orm:"size(255)"`
+	PostbackPayout    float32
+	ModifyDate        string `orm:"size(255)"`
+	RenewalTime       string `orm:"size(255)"`
+	ClickType         string `orm:"size(15)"`
+	CanvasID          string `orm:"column(canvas_id)"`           // 帆布ID
+	LastTransactionID string `orm:"column(last_transaction_id)"` // 最后一次扣费的交易id
 
 	IP        string `orm:"column(ip);size(20)"` // 用户IP地址
 	UserAgent string `orm:"column(user_agent)"`  // 用户user_agent
 	Refer     string `orm:"column(refer)"`       // 网页来源
+
+	TrackID int64 `orm:"column(track_id)"`
+	OfferID int   `orm:"column(offer_id)"`
+	CampID  int   `orm:"column(camp_id)"`
 }
 
 func (mo *Mo) TableName() string {
@@ -59,6 +64,11 @@ func (mo *Mo) InitNewSubMO(response *Notification, affTrack *AffTrack) *Mo {
 	mo.ServiceID = affTrack.ServiceID
 	mo.IP = affTrack.IP
 	mo.UserAgent = affTrack.UserAgent
+
+	mo.OfferID = affTrack.OfferID
+	mo.CampID = affTrack.CampID
+	logs.Info("camp_id", mo.CampID, "新订阅")
+	mo.TrackID = affTrack.TrackID
 
 	// WapResponse init
 	mo.Msisdn = response.Msisdn
@@ -112,16 +122,13 @@ func (mo *Mo) GetMoByMsisdnAndServiceID(msisdn, serviceID string) *Mo {
 }
 
 // 成功扣费更新MO表
-func (mo *Mo) SuccessMTUpdateMO(subscriptionID string) (notificationType string, err error) {
+func (mo *Mo) SuccessMTUpdateMO(subscriptionID, transactionID string) (notificationType string, err error) {
 	//o := orm.NewOrm()
 	_, nowDate := util.GetNowTimeFormat()
-	//err = o.QueryTable(MoTBName()).Filter("subscription_id", subscriptionID).One(mo)
-	//if err != nil {
-	//	logs.Error("SuccessMTUpdateMO 收到扣费通知后更新MO表失败，ERROR: ", err.Error())
-	//	return
-	//}
-	if mo.ID != 0 && mo.ModifyDate != nowDate {
+
+	if mo.ID != 0 && mo.LastTransactionID != transactionID {
 		mo.ModifyDate = nowDate
+		mo.LastTransactionID = transactionID
 		mo.SuccessMT++
 		_ = mo.UpdateMO()
 		notificationType = "SUCCESS_MT"
@@ -199,8 +206,8 @@ func (mo *Mo) IsSubByCanvasID() bool {
 func (mo *Mo) GetAffNameTodaySubInfo() (subNum, postbackNum int64) {
 	o := orm.NewOrm()
 	_, nowDate := util.GetFormatTime()
-	subNum, _ = o.QueryTable(MoTBName()).Filter("aff_name", mo.AffName).Filter("subtime__gt", nowDate).Count()
-	postbackNum, _ = o.QueryTable(MoTBName()).Filter("aff_name", mo.AffName).Filter("postback_status", 1).
+	subNum, _ = o.QueryTable(MoTBName()).Filter("aff_name", mo.AffName).Filter("camp_id", 0).Filter("subtime__gt", nowDate).Count()
+	postbackNum, _ = o.QueryTable(MoTBName()).Filter("aff_name", mo.AffName).Filter("camp_id", 0).Filter("postback_status", 1).
 		Filter("subtime__gt", nowDate).Count()
 	logs.Info(mo.AffName, nowDate, "sub_num: ", subNum, " postback_num: ", postbackNum)
 	return
@@ -251,4 +258,26 @@ func (mo *Mo) GetMoOrderByMsisdnByTest(msisdn, serviceID string) error {
 		logs.Error("GetMoOrderByMsisdn ERROR", err.Error())
 	}
 	return err
+}
+
+func (mo *Mo) GetCampTodaySubNum(campID int) (int64, error) {
+	o := orm.NewOrm()
+	_, nowDate := util.GetFormatTime()
+	subNum, err := o.QueryTable(MoTBName()).Filter("camp_id", campID).Filter("subtime__gt", nowDate).Count()
+	if err != nil {
+		logs.Error("GetCampTodaySubNum ", campID, " 获取今日的订阅数量失败 ERROR: ", err.Error())
+	}
+	logs.Info("GetTodaySubNum campID:", campID, "  今日的订阅数量: ", subNum)
+	return subNum, err
+}
+
+func (mo *Mo) GetOfferTodaySubInfo() (subNum, postbackNum int64) {
+	o := orm.NewOrm()
+	_, nowDate := util.GetFormatTime()
+
+	subNum, _ = o.QueryTable(MoTBName()).Filter("offer_id", mo.OfferID).Filter("subtime__gt", nowDate).Count()
+	postbackNum, _ = o.QueryTable(MoTBName()).Filter("offer_id", mo.OfferID).Filter("postback_status", 1).
+		Filter("subtime__gt", nowDate).Count()
+	logs.Info(mo.AffName, nowDate, "sub_num: ", subNum, " postback_num: ", postbackNum)
+	return
 }

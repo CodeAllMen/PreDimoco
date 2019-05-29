@@ -35,7 +35,8 @@ func (c *BaseController) CheckError(err error, errorCode enums.ErrorCode, msg ..
 	}
 }
 
-func (c *BaseController) NewInsertMo(notification *dimoco.Notification, affTrack *dimoco.AffTrack) (notificationType string) {
+func (c *BaseController) NewInsertMo(notification *dimoco.Notification, affTrack *dimoco.AffTrack) (*dimoco.Mo, string) {
+	notificationType := ""
 	mo := new(dimoco.Mo)
 	isExist := mo.CheckSubIDIsExist(notification.SubscriptionID)
 
@@ -45,7 +46,14 @@ func (c *BaseController) NewInsertMo(notification *dimoco.Notification, affTrack
 		// 初始化MO数据
 		mo.InitNewSubMO(notification, affTrack)
 		// 查询次网盟今天的订阅数及postback回传数，根据概率判断次数书是否回传
-		subNum, postbackNum := mo.GetAffNameTodaySubInfo()
+
+		var subNum, postbackNum int64
+		if mo.OfferID == 0 {
+			subNum, postbackNum = mo.GetAffNameTodaySubInfo()
+		} else {
+			subNum, postbackNum = mo.GetOfferTodaySubInfo()
+		}
+
 		// 根据概率判断次数书是否回传
 		isSuccess, code, payout := dimoco.StartPostback(mo, subNum, postbackNum)
 		mo.PostbackCode = code
@@ -63,7 +71,7 @@ func (c *BaseController) NewInsertMo(notification *dimoco.Notification, affTrack
 		_ = mo.InsertNewMo()
 		notificationType = "SUB"
 	}
-	return
+	return mo, notificationType
 }
 
 func (c *BaseController) getServiceConfig(serviceID string) dimoco.ServiceInfo {
@@ -148,4 +156,66 @@ func (c *BaseController) UnmarshalXMLData(data []byte, v interface{}) {
 	reflect.TypeOf(v)
 
 	//err := xml.Unmarshal(data, v)
+}
+
+func (c *BaseController) HandlerParameterToAffTrack(track *dimoco.AffTrack) *dimoco.AffTrack {
+	// 获取网盟名称
+	track.AffName = c.GetString("affName")
+	if track.AffName == "" {
+		track.AffName = c.GetString("aff")
+		if track.AffName == "" {
+			track.AffName = "aff_name"
+		}
+	}
+
+	// 获取offerID
+	offerID, _ := c.GetInt("offer")
+	if offerID == 0 {
+		offerID, _ = c.GetInt("of")
+		if offerID == 0 {
+			offerID, _ = c.GetInt("f")
+		}
+	}
+	track.OfferID = offerID
+
+	// 获取子渠道
+	track.PubID = c.GetString("pubId")
+	if track.PubID == "" {
+		track.PubID = c.GetString("pub")
+		if track.PubID == "" {
+			track.PubID = c.GetString("p")
+		}
+	}
+
+	// 获取click_id
+	track.ClickID = c.GetString("clickId")
+	if track.ClickID == "" {
+		track.ClickID = c.GetString("click")
+		if track.ClickID == "" {
+			track.ClickID = c.GetString("c")
+		}
+	}
+
+	// 获取 服务id
+	track.ProID = c.GetString("pro")
+	if track.ProID == "" {
+		track.ProID = c.GetString("proId")
+	}
+
+	// 获取其他参数
+	track.OtherData = c.GetString("ot")
+	if track.OtherData == "" {
+		track.OtherData = c.GetString("o")
+	}
+
+	// IP
+	track.IP = c.GetString("ip")
+
+	// 如果offerID 不为空，则根据offerid 查询对应的网盟名称
+	if track.OfferID != 0 {
+		track.AffName = dimoco.GetAffNameByOfferID(offerID)
+	}
+
+	track.Refer = c.GetString("rf")
+	return track
 }

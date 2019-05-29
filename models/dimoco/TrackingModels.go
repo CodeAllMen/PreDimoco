@@ -25,6 +25,10 @@ type AffTrack struct {
 	Refer       string `orm:"column(refer)"`       // 网页来源
 	CanvasID    string `orm:"column(canvas_id)"`   // 帆布ID
 	CookieID    string `orm:"column(cookie_id)"`   // CookieID
+
+	OfferID   int    `orm:"column(offer_id)"`
+	CampID    int    `orm:"column(camp_id)"`
+	OtherData string `orm:"column(other_data)"`
 }
 
 func (track *AffTrack) TableName() string {
@@ -97,4 +101,3 @@ func GetServiceIDByTrackID(trackID string) (*AffTrack, error) {
 	}
 	return track, err
 }
-
