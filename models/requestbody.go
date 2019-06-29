@@ -1,9 +1,10 @@
 package models
 
 import (
-	"github.com/astaxie/beego/logs"
 	"strconv"
 	"time"
+
+	"github.com/astaxie/beego/logs"
 
 	"github.com/MobileCPX/PreDimoco/conf"
 )
