@@ -275,6 +275,7 @@ func (c *SubFlowController) IdentifyReturn() {
 func (c *SubFlowController) StartSub() {
 	// 获取trackID 将trackID 转为int 类型
 	trackID := c.GetString("track")
+	msisdn := c.GetString("msisdn")
 	trackIDInt := c.trackIDStrToInt(trackID)
 
 	track := new(dimoco.AffTrack)
@@ -284,7 +285,7 @@ func (c *SubFlowController) StartSub() {
 	}
 
 	serviceConfig := c.getServiceConfig(track.ServiceID)
-	respBody, err := dimoco.DimocoRequest(serviceConfig, enums.StartSubRequest, trackID, "", "")
+	respBody, err := dimoco.DimocoRequest(serviceConfig, enums.StartSubRequest, trackID, "", "", msisdn)
 
 	if err != nil {
 		c.Redirect("http://google.com", 302)
