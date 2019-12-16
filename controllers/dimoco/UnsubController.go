@@ -44,7 +44,7 @@ func (c *UnsubController) UnsubWap3G() {
 	//mo.GetMoByMsisdnAndServiceID(msisdn, serviceID)
 	//subID := unsub.MsisdnGetSubID(msisdn)
 	if subID != "" {
-		requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, subID, "close-subscription", subID, "")
+		requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, subID, "close-subscription", subID, "", "")
 		digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceInfo.Secret))
 		requestBody["digest"] = digest
 		respBody, err := httpRequest.SendRequest(requestBody, serviceInfo.ServerURL)
@@ -69,7 +69,7 @@ func (c *UnsubController) UnsubWap3G() {
 	}
 	//}
 
-	requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, strconv.Itoa(int(1122)), "identify", "", "unsub")
+	requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, strconv.Itoa(int(1122)), "identify", "", "unsub", "")
 	digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceInfo.Secret))
 	requestBody["digest"] = digest
 	respBody, err := httpRequest.SendRequest(requestBody, serviceInfo.ServerURL)
@@ -152,7 +152,7 @@ func (c *UnsubController) UnsubIdentify() {
 		// 检查用户是否已经订阅
 		if identifyNotify.SubscriptionID != "" {
 
-			requestBody, encodeMessage := dimoco.GetRequestBody(serviceConfig, identifyNotify.SubscriptionID, "close-subscription", identifyNotify.SubscriptionID, "")
+			requestBody, encodeMessage := dimoco.GetRequestBody(serviceConfig, identifyNotify.SubscriptionID, "close-subscription", identifyNotify.SubscriptionID, "", "")
 			digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceConfig.Secret))
 			requestBody["digest"] = digest
 			respBody, err := httpRequest.SendRequest(requestBody, serviceConfig.ServerURL)
