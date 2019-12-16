@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-func DimocoRequest(serviceConfig ServiceInfo, requestType, trackID string, subID string, types string) ([]byte, error) {
-	requestBody, encodeMessage := GetRequestBody(serviceConfig, trackID, requestType, subID, subID)
+func DimocoRequest(serviceConfig ServiceInfo, requestType, trackID string, subID string, types string, msisdn string) ([]byte, error) {
+	requestBody, encodeMessage := GetRequestBody(serviceConfig, trackID, requestType, subID, subID, msisdn)
 	// 加密请求字段
 	digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceConfig.Secret))
 	requestBody["digest"] = digest
@@ -51,7 +51,7 @@ func sendRequest(values map[string]string, URL string) ([]byte, error) {
 	return responseData, err
 }
 
-func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string, types string) (map[string]string, string) {
+func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string, types string, msisdn string) (map[string]string, string) {
 	requestBody := make(map[string]string)
 	requestBody["action"] = requestType
 	requestBody["merchant"] = serviceCofig.Merchant
