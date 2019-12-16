@@ -82,10 +82,18 @@ func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string
 		requestBody["manage_subscription_url_callback"] = serviceCofig.NotificationURL
 		requestBody["close_notification_url_callback"] = serviceCofig.NotificationURL
 		requestBody["amount"] = serviceCofig.Amount
-		encodeMessage = requestBody["action"] + requestBody["amount"] + requestBody["close_notification_url_callback"] +
-			requestBody["manage_subscription_url_callback"] + requestBody["merchant"] + requestBody["order"] +
-			requestBody["prompt_merchant_args"] + requestBody["prompt_product_args"] +
-			requestBody["request_id"] + requestBody["service_name"] + requestBody["url_callback"] + requestBody["url_return"]
+		if msisdn == "" {
+			encodeMessage = requestBody["action"] + requestBody["amount"] + requestBody["close_notification_url_callback"] +
+				requestBody["manage_subscription_url_callback"] + requestBody["merchant"] + requestBody["order"] +
+				requestBody["prompt_merchant_args"] + requestBody["prompt_product_args"] +
+				requestBody["request_id"] + requestBody["service_name"] + requestBody["url_callback"] + requestBody["url_return"]
+		} else {
+			requestBody["msisdn"] = msisdn
+			encodeMessage = requestBody["action"] + requestBody["amount"] + requestBody["close_notification_url_callback"] +
+				requestBody["manage_subscription_url_callback"] + requestBody["merchant"] + requestBody["msisdn"] + requestBody["order"] +
+				requestBody["prompt_merchant_args"] + requestBody["prompt_product_args"] +
+				requestBody["request_id"] + requestBody["service_name"] + requestBody["url_callback"] + requestBody["url_return"]
+		}
 	case enums.UnsubReuqest:
 		requestBody["request_id"] = trackID + "_unsub" + "_" + timeStr
 		requestBody["subscription"] = subID
