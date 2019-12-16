@@ -87,7 +87,7 @@ func (c *SubFlowController) ServiceIdentify() {
 	// 获取 Click4FunGame 的服务配置信息
 	gameServiceInfo := c.getServiceConfig(affTrack.ServiceID)
 
-	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, trackID, "", "")
+	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, trackID, "", "", "")
 	if err != nil {
 		logs.Error("Click4FunGameIdentify SendRequest 失败， ERROR： ", err.Error())
 		c.redirect("http://google.com")
@@ -147,7 +147,7 @@ func (c *SubFlowController) TotalServiceIdentify() {
 	// 获取 Click4FunGame 的服务配置信息
 	gameServiceInfo := c.getServiceConfig(affTrack.ServiceID)
 
-	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, strconv.Itoa(int(trackID)), "", "")
+	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, strconv.Itoa(int(trackID)), "", "", "")
 	if err != nil {
 		logs.Error("Click4FunGameIdentify SendRequest 失败， ERROR： ", err.Error())
 		c.redirect("http://google.com")
@@ -206,7 +206,7 @@ func (c *SubFlowController) Click4FunGameIdentify() {
 	// 获取 Click4FunGame 的服务配置信息
 	gameServiceInfo := c.getServiceConfig(affTrack.ServiceID)
 
-	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, strconv.Itoa(int(trackID)), "", "")
+	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, strconv.Itoa(int(trackID)), "", "", "")
 	if err != nil {
 		logs.Error("Click4FunGameIdentify SendRequest 失败， ERROR： ", err.Error())
 		c.redirect("http://google.com")
