@@ -103,7 +103,7 @@ func (c *UnsubController) MsisdnUnsub() {
 		err := mo.GetMoOrderByMsisdn(msisdn)
 		//subID := unsub.MsisdnGetSubID(msisdn)
 		if err == nil && mo.SubscriptionID != "" {
-			requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, mo.SubscriptionID, "close-subscription", mo.SubscriptionID, "")
+			requestBody, encodeMessage := dimoco.GetRequestBody(serviceInfo, mo.SubscriptionID, "close-subscription", mo.SubscriptionID, "", "")
 			digest := util.HmacSha256([]byte(encodeMessage), []byte(serviceInfo.Secret))
 			requestBody["digest"] = digest
 			respBody, err := httpRequest.SendRequest(requestBody, serviceInfo.ServerURL)
