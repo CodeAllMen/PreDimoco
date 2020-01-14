@@ -90,7 +90,9 @@ func (c *SubFlowController) ServiceIdentify() {
 	resp, err := dimoco.DimocoRequest(gameServiceInfo, enums.UserIdentify, trackID, "", "", "")
 	if err != nil {
 		logs.Error("Click4FunGameIdentify SendRequest 失败， ERROR： ", err.Error())
-		c.redirect("http://google.com")
+		c.Data["ErrorMessage"] = err.Error()
+		c.TplName = "/views/error.html"
+		return
 	}
 
 	// 解析xml返回数据
