@@ -277,8 +277,8 @@ func (c *SubFlowController) IdentifyReturn() {
 func (c *SubFlowController) StartSub() {
 	// 获取trackID 将trackID 转为int 类型
 	logs.Info("LP页面点击订阅按钮 ，开始跳转到支付页面")
-	trackID := c.Ctx.Input.Param("track")
-	msisdn := c.Ctx.Input.Param("msisdn")
+	trackID := c.Ctx.Input.Param(":track")
+	msisdn := c.Ctx.Input.Param(":msisdn")
 	logs.Info("msidn:", msisdn)
 	trackIDInt := c.trackIDStrToInt(trackID)
 

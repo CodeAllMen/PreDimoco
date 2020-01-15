@@ -22,7 +22,8 @@ func InitSql() {
 	//if beego.AppConfig.String("runmode") == "dev" {
 	//	orm.Debug = true
 	//}
-	//orm.Debug = true
+	orm.Debug = false
+	fmt.Println("数据库语句关闭")
 	orm.DefaultRowsLimit = -1
 	orm.RegisterDriver("postgres", orm.DRPostgres) // 注册驱动
 	orm.RegisterDataBase("default",
