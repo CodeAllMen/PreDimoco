@@ -38,6 +38,7 @@ func sendRequest(values map[string]string, URL string) ([]byte, error) {
 	}
 
 	//把post表单发送给目标服务器
+	logs.Info("把post表单发送给目标服务器")
 	res, err := http.PostForm(URL, data)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -73,7 +74,6 @@ func GetRequestBody(serviceCofig ServiceInfo, trackID, requestType, subID string
 			requestBody["request_id"] + requestBody["url_callback"] + requestBody["url_return"]
 	case enums.StartSubRequest:
 		requestBody["request_id"] = trackID + "_sub" + "_" + timeStr
-		//requestBody["service_name"] = conf.Conf.ServiceName
 		requestBody["service_name"] = serviceCofig.ServiceName
 		requestBody["url_callback"] = serviceCofig.NotificationURL
 		requestBody["url_return"] = serviceCofig.StartSubscriptionURLReturn + "?track=" + trackID

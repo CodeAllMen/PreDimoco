@@ -276,8 +276,10 @@ func (c *SubFlowController) IdentifyReturn() {
 // LP页面点击订阅按钮 ，开始跳转到支付页面
 func (c *SubFlowController) StartSub() {
 	// 获取trackID 将trackID 转为int 类型
+	logs.Info("LP页面点击订阅按钮 ，开始跳转到支付页面")
 	trackID := c.GetString("track")
 	msisdn := c.GetString("msisdn")
+	logs.Info("msidn:", msisdn)
 	trackIDInt := c.trackIDStrToInt(trackID)
 
 	track := new(dimoco.AffTrack)
@@ -313,6 +315,7 @@ func (c *SubFlowController) StartSub() {
 	// start-sub 获取到跳转链接后跳转
 	if identifyResult.ActionResult.Status == enums.RequestSuccess {
 		redirectURL := identifyResult.ActionResult.RedirectURL.URL
+		logs.Info("start-sub 获取到跳转链接后跳转:", redirectURL)
 		c.redirect(redirectURL)
 	} else {
 		redirectURL := "http://google.com"
