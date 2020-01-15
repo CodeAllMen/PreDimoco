@@ -19,11 +19,11 @@ func init() {
 	beego.Router("/game/identify", &dimoco.SubFlowController{}, "Get:Click4FunGameIdentify")
 	beego.Router("/identify/return", &dimoco.SubFlowController{}, "Get:IdentifyReturn")
 
-	beego.Router("/start-sub", &dimoco.SubFlowController{}, "Get:StartSub")
+	beego.Router("/start-sub/:track/:msisdn", &dimoco.SubFlowController{}, "Get:StartSub")
 	beego.Router("/start-sub/return", &dimoco.SubFlowController{}, "Get:StartSubReturn")
 
 	// 所有的callback 信息
-	beego.Router("/notification", &dimoco.NotificationController{}, )
+	beego.Router("/notification", &dimoco.NotificationController{})
 
 	// 退订
 	beego.Router("/msisdn/unsub", &dimoco.UnsubController{}, "Get:MsisdnUnsub")

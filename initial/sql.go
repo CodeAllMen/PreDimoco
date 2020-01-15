@@ -19,10 +19,10 @@ func InitSql() {
 	if nil != err {
 		port = 5432
 	}
-	if beego.AppConfig.String("runmode") == "dev" {
-		orm.Debug = true
-	}
-	orm.Debug = true
+	//if beego.AppConfig.String("runmode") == "dev" {
+	//	orm.Debug = true
+	//}
+	//orm.Debug = true
 	orm.DefaultRowsLimit = -1
 	orm.RegisterDriver("postgres", orm.DRPostgres) // 注册驱动
 	orm.RegisterDataBase("default",
