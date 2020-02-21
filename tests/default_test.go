@@ -5,19 +5,12 @@ import (
 	_ "github.com/MobileCPX/PreDimoco/routers"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
-	"runtime"
 	"testing"
+	"time"
 
 	"github.com/astaxie/beego"
 	. "github.com/smartystreets/goconvey/convey"
 )
-
-func init() {
-	_, file, _, _ := runtime.Caller(1)
-	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
-	beego.TestBeegoInit(apppath)
-}
 
 // TestBeego is a sample to run an endpoint test
 func TestBeego(t *testing.T) {
@@ -42,4 +35,15 @@ func TestF(t *testing.T) {
 		fmt.Println("ssss")
 	}
 	fmt.Println("le")
+}
+
+func TestMo(t *testing.T) {
+	now := time.Now()
+	aftef := now.AddDate(0, 0, 7)
+	fmt.Println(now, aftef, now.After(aftef))
+}
+
+func TestMIs(t *testing.T) {
+	msisdn := "11234567890"
+	fmt.Println(msisdn[len(msisdn)-9:])
 }

@@ -114,9 +114,9 @@ func (mo *Mo) UpdateMO() error {
 }
 
 // 通过电话号码和ServiceID查询Mo信息
-func (mo *Mo) GetMoByMsisdnAndServiceID(msisdn, serviceID string) *Mo {
+func (mo *Mo) GetMoByMsisdnAndServiceID(msisdn, serviceCode string) *Mo {
 	o := orm.NewOrm()
-	_ = o.QueryTable(MoTBName()).Filter("msisdn", msisdn).Filter("service_id", serviceID).
+	_ = o.QueryTable(MoTBName()).Filter("msisdn", msisdn).Filter("service_id", serviceCode).
 		OrderBy("-id").One(mo)
 	return mo
 }

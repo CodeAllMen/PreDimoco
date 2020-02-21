@@ -279,7 +279,10 @@ func (c *SubFlowController) StartSub() {
 	logs.Info("LP页面点击订阅按钮 ，开始跳转到支付页面")
 	trackID := c.Ctx.Input.Param(":track")
 	msisdn := c.Ctx.Input.Param(":msisdn")
+	//统一两种格式 local format 0787649764 和 48787649764
+	msisdn = "48" + msisdn[len(msisdn)-9:]
 	logs.Info("msidn:", msisdn)
+
 	trackIDInt := c.trackIDStrToInt(trackID)
 
 	track := new(dimoco.AffTrack)
@@ -289,6 +292,34 @@ func (c *SubFlowController) StartSub() {
 	}
 
 	serviceConfig := c.getServiceConfig(track.ServiceID)
+	logs.Info(serviceConfig.Order)
+	mo := &dimoco.Mo{}
+	mo = mo.GetMoByMsisdnAndServiceID(msisdn, serviceConfig.Order)
+	if mo.ID != 0 {
+		//检查时间范围
+		ctime := ""
+		if mo.RenewalTime != "" {
+			ctime = mo.RenewalTime
+		} else {
+			ctime = mo.Subtime
+		}
+		//获取本地时区，
+		loc, _ := time.LoadLocation("Local")
+		//指定时间模板
+		l := "2006-01-02 15:04:05"
+		t, _ := time.ParseInLocation(l, ctime, loc)
+		//订阅过期时间
+		unsub := t.AddDate(0, 0, 7)
+		//如果在过期时间内，则跳转到内容站，否则跳转到支付页面
+		if unsub.After(time.Now()) {
+			logs.Info("用户", msisdn, "未超出期限")
+			c.redirect(serviceConfig.ContentURL)
+		} else {
+			logs.Info("用户", msisdn, "超出期限，跳转支付页面")
+		}
+	}
+	logs.Info("用户未订阅 :", msisdn, "跳转支付页面")
+
 	respBody, err := dimoco.DimocoRequest(serviceConfig, enums.StartSubRequest, trackID, "", "", msisdn)
 
 	if err != nil {
