@@ -1,13 +1,15 @@
 package dimoco
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/MobileCPX/PreBaseLib/common"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
-	"github.com/astaxie/beego"
+	"io/ioutil"
 )
 
 type SetPostbackController struct {
-	beego.Controller
+	common.BaseController
 }
 
 func (c *SetPostbackController) Get() {
@@ -18,11 +20,12 @@ func (c *SetPostbackController) Get() {
 	postbackRate, _ := c.GetInt("rate")
 	offerID, _ := c.GetInt("offer_id")
 	campID, _ := c.GetInt("camp_id")
-	fmt.Println(affName, promoter, postbackURL, offerID,campID)
+	fmt.Println(affName, promoter, postbackURL, offerID, campID)
 	postback := new(dimoco.Postback)
 	if offerID != 0 && campID != 0 {
 		err := postback.CheckOfferID(int64(offerID))
 		if err == nil && postback.ID != 0 {
+			fmt.Println("ERROR,OfferID已经存在")
 			c.Ctx.WriteString("ERROR,OfferID已经存在")
 			c.StopRun()
 		} else {
@@ -38,11 +41,47 @@ func (c *SetPostbackController) Get() {
 			}
 			err = postback.InsertPostback()
 			if err != nil {
+				fmt.Println("ERROR,插入postbak失败")
 				c.Ctx.WriteString("ERROR,插入postbak失败")
 				c.StopRun()
 			}
 		}
 	} else {
+		fmt.Println("ERROR,offerID 是空")
+		c.Ctx.WriteString("ERROR,offerID 是空")
+		c.StopRun()
+	}
+	c.Ctx.WriteString("SUCCESS")
+}
+
+func (c *SetPostbackController) Post() {
+	postback := new(dimoco.Postback)
+
+	reqBody := c.Ctx.Request.Body
+	reqByte, err := ioutil.ReadAll(reqBody)
+	if err == nil {
+		_ = json.Unmarshal(reqByte, postback)
+		fmt.Println(postback)
+	} else {
+		c.StringResult("ERROR,json解析失败： " + err.Error())
+	}
+
+	if postback.OfferID != 0 && postback.CampID != 0 {
+		err := postback.CheckOfferID(int64(postback.OfferID))
+		if err == nil && postback.ID != 0 {
+			fmt.Println("ERROR,OfferID已经存在")
+			c.Ctx.WriteString("ERROR,OfferID已经存在")
+			c.StopRun()
+		} else {
+			err = postback.InsertPostback()
+			if err != nil {
+				fmt.Println("ERROR,插入postbak失败")
+				c.Ctx.WriteString("ERROR,插入postbak失败")
+				c.StopRun()
+			}
+		}
+	} else {
+		fmt.Println("ERROR,offerID 是空")
 		c.Ctx.WriteString("ERROR,offerID 是空")
 		c.StopRun()
 	}

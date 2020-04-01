@@ -57,7 +57,7 @@ func (c *MsisdnUnsubControllers) Get() {
 				redirectURL := identifyResult.ActionResult.RedirectURL.URL
 				c.Redirect(redirectURL, 302)
 			} else if identifyResult.ActionResult.Status == 5 {
-				redirectURL := "http://pl.leadernet-hk.com/unsub/return?subID=" + subID
+				redirectURL := "http://pl.leadernethksp.com/unsub/return?subID=" + subID
 				c.Redirect(redirectURL, 302)
 			} else {
 				// c.Redirect("http://google.com", 302)

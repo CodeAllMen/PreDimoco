@@ -1,33 +1,33 @@
 package dimoco
 
 import (
+	"errors"
 	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego/httplib"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
-	"github.com/pkg/errors"
 	"strconv"
 	"strings"
 	"time"
 )
 
-//Postback 网盟信息
+// Postback 网盟信息
 type Postback struct {
-	ID           int64  `orm:"pk;auto;column(id)"`                //自增ID
-	AffName      string `orm:"column(aff_name);size(30)"`         // 网盟名称
-	PostbackURL  string `orm:"column(postback_url);size(300)"`    // postback URL
-	PostbackRate int    `orm:"column(postback_rate);default(70)"` // 回传概率
-	Payout       float32                                          // 转化单价
+	ID           int64   `orm:"pk;auto;column(id)" json:"id"`                           // 自增ID
+	AffName      string  `orm:"column(aff_name);size(30)" json:"aff_name"`              // 网盟名称
+	PostbackURL  string  `orm:"column(postback_url);size(300)" json:"postback_url"`     // postback URL
+	PostbackRate int     `orm:"column(postback_rate);default(70)" json:"rate"` // 回传概率
+	Payout       float32 `json:"payout"`                                                // 转化单价
 
-	PromoterName string
-	Sendtime     string
-	CampID       int `orm:"column(camp_id)"`
-	OfferID      int `orm:"column(offer_id)"` // offer_id
+	PromoterName string `json:"promoter"`
+	Sendtime     string `json:"sendtime"`
+	CampID       int    `orm:"column(camp_id)" json:"camp_id"`
+	OfferID      int    `orm:"column(offer_id)" json:"offer_id"` // offer_id
 }
 
 // StartPostback 订阅成功后向网盟回传订阅数据
-//请求 todaySubNum 该网盟今日订阅数，  todayPostbackNum 该网盟今日回传数   根据这两个算概率，是否回传
-//返回数据 isSuccess 是否回传   code 网络请求的返回code   payout  请求成功后的花费
+// 请求 todaySubNum 该网盟今日订阅数，  todayPostbackNum 该网盟今日回传数   根据这两个算概率，是否回传
+// 返回数据 isSuccess 是否回传   code 网络请求的返回code   payout  请求成功后的花费
 func StartPostback(mo *Mo, todaySubNum, todayPostbackNum int64) (isSuccess bool, code string, payout float32) {
 	var postback *Postback
 	var err error

@@ -11,15 +11,15 @@ import (
 
 // AffTrack 网盟点击追踪
 type AffTrack struct {
-	TrackID     int64  `orm:"pk;auto;column(track_id)"`    //自增ID
-	Sendtime    string `orm:"column(sendtime);size(30)"`   // 点击时间
-	AffName     string `orm:"column(aff_name);size(30)"`   // 网盟名称
-	PubID       string `orm:"column(pub_id);size(100)"`    // 子渠道
-	ProID       string `orm:"column(pro_id);size(30)"`     // 服务id（可有可无）
-	ClickID     string `orm:"column(click_id);size(100)"`  // 点击
-	ServiceID   string `orm:"column(service_id);size(30)"` // 服务类型
+	TrackID     int64  `orm:"pk;auto;column(track_id)"`                      // 自增ID
+	Sendtime    string `orm:"column(sendtime);size(30)"`                     // 点击时间
+	AffName     string `orm:"column(aff_name);size(30)"`                     // 网盟名称
+	PubID       string `orm:"column(pub_id);size(100)"`                      // 子渠道
+	ProID       string `orm:"column(pro_id);size(30)"`                       // 服务id（可有可无）
+	ClickID     string `orm:"column(click_id);size(100)"`                    // 点击
+	ServiceID   string `orm:"column(service_id);size(30)" json:"service_id"` // 服务类型
 	RequestID   string `orm:"column(request_id)"`
-	ServiceName string `orm::column(service_name)"`
+	ServiceName string `orm:"column(service_name)" json:"service_name"`
 	IP          string `orm:"column(ip);size(20)"` // 用户IP地址
 	UserAgent   string `orm:"column(user_agent)"`  // 用户user_agent
 	Refer       string `orm:"column(refer)"`       // 网页来源

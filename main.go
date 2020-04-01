@@ -25,7 +25,7 @@ func main() {
 func task() {
 	cr := cron.New()
 	// cr.AddFunc("0 5 7 */1 * ?", dcb.EveryDayBillingRequest)
-	_ = cr.AddFunc("0 0 */1 * * ?", searchAPI.AffClickData)
+	_, _ = cr.AddFunc("0 0 */1 * * ?", searchAPI.AffClickData)
 
 	// cr.AddFunc("0 2 */1 * * ?", dcb.StartBillingRequest) // 每一个小时统一扣一次费用
 	// cr.AddFunc("0 1 0 */1 * ?", models.InsertEveryDaySubData)

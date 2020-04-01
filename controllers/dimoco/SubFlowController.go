@@ -1,12 +1,14 @@
 package dimoco
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"github.com/MobileCPX/PreDimoco/enums"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
 	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego/logs"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -21,8 +23,18 @@ func (c *SubFlowController) InsertAffClick() {
 	var campSubNum int64
 	var err error
 	track := new(dimoco.AffTrack)
-	track.ServiceID = c.GetString("service_id")
-	track.ServiceName = c.GetString("service_name")
+	// track.ServiceID = c.GetString("service_id")
+	// track.ServiceName = c.GetString("service_name")
+
+	reqBody := c.Ctx.Request.Body
+	reqByte, err := ioutil.ReadAll(reqBody)
+	if err == nil {
+		_ = json.Unmarshal(reqByte, track)
+		fmt.Println(track)
+	} else {
+		c.StringResult("ERROR,json解析失败： " + err.Error())
+	}
+
 	// 处理传的参数，赋值
 	track = c.HandlerParameterToAffTrack(track)
 

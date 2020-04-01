@@ -16,6 +16,11 @@ type BaseController struct {
 	beego.Controller
 }
 
+func (c *BaseController) StringResult(result string) {
+	c.Ctx.WriteString(result)
+	c.StopRun()
+}
+
 // CheckError 检查是否有错 msg 定义日志信息
 func (c *BaseController) CheckError(err error, errorCode enums.ErrorCode, msg ...string) {
 	if err != nil {

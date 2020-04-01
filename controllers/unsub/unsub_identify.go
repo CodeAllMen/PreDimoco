@@ -41,7 +41,7 @@ func (c *UnsubIdendifyCookieController) Get() {
 				c.Redirect(redirectURL, 302)
 				return
 			} else if identifyResult.ActionResult.Status == 5 {
-				redirectURL := "http://pl.leadernet-hk.com/unsub/return?subID=" + subID
+				redirectURL := "http://pl.leadernethksp.com/unsub/return?subID=" + subID
 				c.Redirect(redirectURL, 302)
 				return
 			}
@@ -100,7 +100,7 @@ func (c *UnsubIdentifyReturn) Get() {
 						c.Redirect(redirectURL, 302)
 						return
 					} else if identifyResult.ActionResult.Status == 5 {
-						redirectURL := "http://pl.leadernet-hk.com/unsub/return?subID=" + mo.SubscriptionID
+						redirectURL := "http://pl.leadernethksp.com/unsub/return?subID=" + mo.SubscriptionID
 						c.Redirect(redirectURL, 302)
 						return
 					}

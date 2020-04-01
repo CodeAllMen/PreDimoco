@@ -9,7 +9,7 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
-	beego.Router("/track/returnid", &dimoco.SubFlowController{}, "Get:InsertAffClick") // 存点击
+	beego.Router("/track/returnid", &dimoco.SubFlowController{}, "Post:InsertAffClick") // 存点击
 	beego.Router("/offer/identify", &dimoco.SubFlowController{}, "Get:ServiceIdentify")
 
 	beego.Router("/service/identify", &dimoco.SubFlowController{}, "Get:TotalServiceIdentify")
