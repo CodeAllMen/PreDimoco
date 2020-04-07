@@ -53,15 +53,15 @@ func (c *StartSubReturnControllers) Get() {
 	// logs.Info(subID)
 	// url := ""
 	// if subID != "" {
-	// 	url = "http://www.c4fungames.com/dm/pl/welcome?status=SUCCESS&subID=" + subID
+	// 	url = "http://c4fun.argameloft.com/dm/pl/welcome?status=SUCCESS&subID=" + subID
 	// } else {
-	// 	url = "http://www.c4fungames.com/dm/pl/welcome"
+	// 	url = "http://c4fun.argameloft.com/dm/pl/welcome"
 	// }
 	parmList := strings.Split(parm, "?")
 	result := ""
 	if len(parmList) > 1 {
 		result = parmList[1]
 	}
-	url := "http://www.c4fungames.com/dm/pl/welcome?" + result
+	url := "http://c4fun.argameloft.com/dm/pl/welcome?" + result
 	c.Redirect(url, 302)
 }

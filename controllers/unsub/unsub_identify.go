@@ -31,7 +31,7 @@ func (c *UnsubIdendifyCookieController) Get() {
 			logs.Info("请求退订的返回数据", string(respBody), err)
 			if err != nil {
 				// c.Redirect("http://google.com", 302)
-				c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.XMLErrorCode, 302)
+				c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.XMLErrorCode, 302)
 				return
 			}
 			identifyResult := result{}
@@ -56,7 +56,7 @@ func (c *UnsubIdendifyCookieController) Get() {
 	identifyResult := sub.Result{}
 	err = xml.Unmarshal(respBody, &identifyResult)
 	if err != nil {
-		c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
+		c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
 		return
 	}
 	if identifyResult.ActionResult.Status == 3 {
@@ -64,7 +64,7 @@ func (c *UnsubIdendifyCookieController) Get() {
 		c.Redirect(redirectURL, 302)
 		return
 	} else {
-		c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
+		c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (c *UnsubIdentifyReturn) Get() {
 					logs.Info("请求退订的返回数据", string(respBody), err)
 					if err != nil {
 						// c.Redirect("http://google.com", 302)
-						c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.XMLErrorCode, 302)
+						c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.XMLErrorCode, 302)
 						return
 					}
 					identifyResult := result{}
@@ -108,5 +108,5 @@ func (c *UnsubIdentifyReturn) Get() {
 				}
 			}
 	}
-	c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
+	c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
 }

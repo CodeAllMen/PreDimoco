@@ -77,12 +77,12 @@ func (c *IdentifyReturnControllers) Get() {
 		if msisdn != "" {
 			mo := notification.GetMoOrderByMsisdn(msisdn)
 			if mo.ID != 0 {
-				c.Redirect("http://www.c4fungames.com?subID="+mo.Msisdn, 302)
+				c.Redirect("http://c4fun.argameloft.com?subID="+mo.Msisdn, 302)
 				c.StopRun()
 			}
 		}
 	}
 
-	url := "http://www.c4fungames.com/dm/pl/lp?track=" + track
+	url := "http://c4fun.argameloft.com/dm/pl/lp?track=" + track
 	c.Redirect(url, 302)
 }

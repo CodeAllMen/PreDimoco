@@ -48,7 +48,7 @@ func (c *MsisdnUnsubControllers) Get() {
 			logs.Info("请求退订的返回数据", string(respBody), err)
 			if err != nil {
 				// c.Redirect("http://google.com", 302)
-				c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.XMLErrorCode, 302)
+				c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.XMLErrorCode, 302)
 				return
 			}
 			identifyResult := result{}
@@ -61,16 +61,16 @@ func (c *MsisdnUnsubControllers) Get() {
 				c.Redirect(redirectURL, 302)
 			} else {
 				// c.Redirect("http://google.com", 302)
-				c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.XMLErrorCode, 302)
+				c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.XMLErrorCode, 302)
 				// return
 			}
 			logs.Info("退订请求数据：", requestBody, "\n 退订响应数据：", string(respBody))
 
 		} else {
-			c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.MsisdnNotExistCode, 302)
+			c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.MsisdnNotExistCode, 302)
 		}
 	} else {
-		c.Redirect("http://www.c4fungames.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
+		c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+conf.MsisdnIsEmptyCode, 302)
 	}
 }
 
@@ -105,5 +105,5 @@ func (c *UnsubResultControllers) Get() {
 		}
 	}
 	fmt.Println(status)
-	c.Redirect("http://www.c4fungames.com/unsub/result?code="+status, 302)
+	c.Redirect("http://c4fun.argameloft.com/unsub/result?code="+status, 302)
 }
