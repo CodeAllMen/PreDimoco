@@ -39,7 +39,7 @@ var char_data1 = []
 
 function getAffiliateData() {
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/aff_data',
+		url: 'http://pl.leadernethksp.com/aff_data',
 		type: 'GET',
 		data: data_aff,
 		dataType: "json",
@@ -75,7 +75,7 @@ function getAffiliateData() {
 
 function getQualitypage() {
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/quality',
+		url: 'http://pl.leadernethksp.com/quality',
 		type: 'GET',
 		data: QualityDatas,
 		dataType: "json",
@@ -105,7 +105,7 @@ function getQualitypage() {
 
 function getEerytimeQualitypage() {
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/sub/mo_data',
+		url: 'http://pl.leadernethksp.com/sub/mo_data',
 		type: 'GET',
 		data: subMoData,
 		dataType: "json",
@@ -135,7 +135,7 @@ function getEerytimeQualitypage() {
 function ComplaintsData(userMsisdn) {
 	var list_title1 = [];
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/msisdn',
+		url: 'http://pl.leadernethksp.com/msisdn',
 		type: 'GET',
 		data: { 'msisdn': userMsisdn },
 		dataType: 'json',
@@ -166,7 +166,7 @@ function GetEveryDaySubPage() {
 	var affNameColumn = [];
 	// var clickType =[];
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/sub/everyday/data',
+		url: 'http://pl.leadernethksp.com/sub/everyday/data',
 		type: 'GET',
 		data: subeveryDayData,
 		dataType: "json",
@@ -293,7 +293,7 @@ function ShowChart() {
 	var end_date = document.getElementById("end_time_char").value ? document.getElementById("end_time_char").value : NowDate();
 	var date, spend, profitAndLoss, revenue;
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/day/chart',
+		url: 'http://pl.leadernethksp.com/day/chart',
 		type: 'GET',
 		data: {
 			'startDate': start_date.substr(0, 10),
@@ -1032,7 +1032,7 @@ $("#query12").click(function () {
 	};
 
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/aff_mt',
+		url: 'http://pl.leadernethksp.com/aff_mt',
 		type: 'GET',
 		data: viewDatas,
 		dataType: "json",
@@ -1122,7 +1122,7 @@ $("#first1").click(function () {
 
 function changeMe1() {
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/get_pubid?aff_name=' + $("#affName").val(),
+		url: 'http://pl.leadernethksp.com/get_pubid?aff_name=' + $("#affName").val(),
 		type: 'GET',
 		dataType: "json",
 		success: function (result) {
@@ -1147,7 +1147,7 @@ function changeMe1() {
 function changeMe() {
 	var a = $("#Quality_Aff_Name").val();
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/get_pubid?aff_name=' + a,
+		url: 'http://pl.leadernethksp.com/get_pubid?aff_name=' + a,
 		type: 'GET',
 		dataType: "json",
 		success: function (result) {
@@ -1172,7 +1172,7 @@ function changeMe() {
 function changeMeAffEverytime() {
 	var a = $("#Quality_Aff_Name1").val();
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/get_pubid?aff_name=' + a,
+		url: 'http://pl.leadernethksp.com/get_pubid?aff_name=' + a,
 		type: 'GET',
 		dataType: "json",
 		success: function (result) {
@@ -1198,7 +1198,7 @@ function changeMeAffEverytime() {
 function changeMe2() {
 	var a = $("#Com_aff").val()
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/get_pubid?aff_name=' + a,
+		url: 'http://pl.leadernethksp.com/get_pubid?aff_name=' + a,
 		type: 'GET',
 		dataType: "json",
 		success: function (result) {
@@ -1222,7 +1222,7 @@ function changeMe2() {
 
 function changeMe3() {
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/get_pubid?aff_name=' + $("#Aff_Name_char").val(),
+		url: 'http://pl.leadernethksp.com/get_pubid?aff_name=' + $("#Aff_Name_char").val(),
 		type: 'GET',
 		dataType: "json",
 		success: function (result) {
@@ -1386,7 +1386,7 @@ $("#com_submit").click(function () {
 		"DealWithTime": $("#Com_time").val()
 	};
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/addComplaint',
+		url: 'http://pl.leadernethksp.com/addComplaint',
 		type: 'POST',
 		data: JSON.stringify(com_data),
 		contentType: "application/json",
@@ -1414,7 +1414,7 @@ $("#com_search").click(function () {
 		// "msisdn":"asdsd",
 	};
 	$.ajax({
-		url: 'http://pl.leadernet-hk.com/get/complaint/data',
+		url: 'http://pl.leadernethksp.com/get/complaint/data',
 		type: 'GET',
 		data: com_data,
 		dataType: "json",

@@ -28,6 +28,7 @@ type ServiceInfo struct {
 	PromptMerchantArgs         string `yaml:"prompt_merchant_args" orm:"column(prompt_merchant_args)"`
 	CloseSubscriptionURLReturn string `yaml:"close_subscription_url_return" orm:"column(close_subscription_url_return)"`
 	ContentURL                 string `yaml:"content_url" orm:"column(content_url)"`
+	CampID                     int    `yaml:"camp_id"`
 	LpURL                      string `yaml:"lp_url" orm:"column(lp_url)"`
 	WelcomePageURL             string `yaml:"welcome_page_url" orm:"column(welcome_page_url)"`
 	UnsubResultURL             string `yaml:"unsub_result_url" orm:"column(unsub_result_url)"`

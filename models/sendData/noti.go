@@ -33,7 +33,7 @@ func (data *SpNotification) SendData() {
 
 func httpPostJson(jsonStr []byte) {
 
-	url := "http://offer.globaltraffictracking.com/sp/data"
+	url := "http://offer.foxseeksp.com/sp/data"
 	//url := "http://127.0.0.1:8081/sp/data"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")

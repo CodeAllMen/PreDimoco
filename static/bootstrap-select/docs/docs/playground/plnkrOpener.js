@@ -68,7 +68,7 @@ $(document).ready(function() {
         files.push(getData(file));
       });
 
-      function sendData() {
+      function pl.() {
         postData.description = ctrl.example.name;
 
         formPostData('https://plnkr.co/edit/?p=preview', postData);

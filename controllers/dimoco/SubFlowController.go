@@ -31,12 +31,18 @@ func (c *SubFlowController) InsertAffClick() {
 	if err == nil {
 		_ = json.Unmarshal(reqByte, track)
 		fmt.Println(track)
+		fmt.Println("camp_id: ", track.CampID)
+		fmt.Println("aff_name: ", track.AffName)
+		fmt.Println("offer_id: ", track.OfferID)
+		// trackMap := new(map[string]interface{})
+		// _ = json.Unmarshal(reqByte, trackMap)
+		// fmt.Println(trackMap)
 	} else {
 		c.StringResult("ERROR,json解析失败： " + err.Error())
 	}
 
 	// 处理传的参数，赋值
-	track = c.HandlerParameterToAffTrack(track)
+	// track = c.HandlerParameterToAffTrack(track)
 
 	// 存入点击信息
 
