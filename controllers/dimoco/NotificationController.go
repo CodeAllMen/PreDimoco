@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/MobileCPX/PreDimoco/httpRequest"
 	"github.com/MobileCPX/PreDimoco/models/dimoco"
-	"github.com/MobileCPX/PreDimoco/models/pl."
+	"github.com/MobileCPX/PreDimoco/models/sendData"
 	"github.com/MobileCPX/PreDimoco/util"
 	"github.com/astaxie/beego/logs"
 )
